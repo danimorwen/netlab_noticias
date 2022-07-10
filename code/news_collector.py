@@ -75,24 +75,30 @@ class DisinformationNewsCollector:
         return news_list
 
 
-# collector_news = DisinformationNewsCollector()
-# disinformation_news = collector_news.collect()
-# print(disinformation_news)
-
-
 class ElasticsearchClient:
     def __init__(self):
-        print("Trying to connect to Elasticsearch")
         self.es = Elasticsearch(["http://elasticsearch:9200"])
         print("Connected to Elasticsearch")
-        print(self.es)
 
     def create_index(self):
-        print(self.es.ping())
+        mapping_dict = {
+            "properties": {
+                "title": {"type": "text"},
+                "date": {"type": "date"},
+                "body": {"type": "text"},
+                "url": {"type": "text"},
+            }
+        }
+        if not self.es.indices.exists(index="news"):
+            self.es.indices.create(index="news", mappings=mapping_dict)
 
-    def add_news(self, news):
-        pass
+    def add_news(self, documents, index):
+        for document in documents:
+            self.es.create(index=index, document=document)
 
 
+collector_news = DisinformationNewsCollector()
+disinformation_news = collector_news.collect()
 news = ElasticsearchClient()
 news.create_index()
+news.add_news(disinformation_news, "news")
