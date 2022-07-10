@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+from elasticsearch import Elasticsearch
 
 
 class NewsUrlsCollector:
@@ -74,6 +75,30 @@ class DisinformationNewsCollector:
         return news_list
 
 
+class ElasticsearchClient:
+    def __init__(self):
+        self.es = Elasticsearch(["http://elasticsearch:9200"])
+        print("Connected to Elasticsearch")
+
+    def create_index(self):
+        mapping_dict = {
+            "properties": {
+                "title": {"type": "text"},
+                "date": {"type": "date"},
+                "body": {"type": "text"},
+                "url": {"type": "text"},
+            }
+        }
+        if not self.es.indices.exists(index="news"):
+            self.es.indices.create(index="news", mappings=mapping_dict)
+
+    def add_news(self, documents, index):
+        for document in documents:
+            self.es.create(index=index, document=document)
+
+
 collector_news = DisinformationNewsCollector()
 disinformation_news = collector_news.collect()
-print(disinformation_news)
+news = ElasticsearchClient()
+news.create_index()
+news.add_news(disinformation_news, "news")
