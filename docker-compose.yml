@@ -3,3 +3,34 @@ version: "3"
 services:
   app:
     build: .
+    depends_on:
+      - elasticsearch
+    volumes:
+      - .:/app
+    entrypoint:
+      [
+        "./wait-for-it.sh",
+        "-t",
+        "30",
+        "elasticsearch:9200",
+        "--",
+        "python3",
+        "code/news_collector.py"
+      ]
+    networks:
+      - netlab_network
+
+  elasticsearch:
+    image: elasticsearch:8.3.2
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - netlab_network
+
+networks:
+  netlab_network:
+
+

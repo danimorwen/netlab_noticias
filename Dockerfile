@@ -8,6 +8,5 @@ RUN pip install --upgrade pip
 RUN pip install -r /temp/requirements.txt
 RUN rm -f /temp/requirements.txt
 
-COPY . .
-
-CMD ["python3", "code/news_collector.py"]
+COPY wait-for-it.sh wait-for-it.sh
+RUN chmod 0755 wait-for-it.sh

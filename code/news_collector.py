@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+from elasticsearch import Elasticsearch
 
 
 class NewsUrlsCollector:
@@ -74,6 +75,24 @@ class DisinformationNewsCollector:
         return news_list
 
 
-collector_news = DisinformationNewsCollector()
-disinformation_news = collector_news.collect()
-print(disinformation_news)
+# collector_news = DisinformationNewsCollector()
+# disinformation_news = collector_news.collect()
+# print(disinformation_news)
+
+
+class ElasticsearchClient:
+    def __init__(self):
+        print("Trying to connect to Elasticsearch")
+        self.es = Elasticsearch(["http://elasticsearch:9200"])
+        print("Connected to Elasticsearch")
+        print(self.es)
+
+    def create_index(self):
+        print(self.es.ping())
+
+    def add_news(self, news):
+        pass
+
+
+news = ElasticsearchClient()
+news.create_index()
