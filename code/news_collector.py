@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 from elasticsearch import Elasticsearch
 
-
+# this class collects news' urls from G1 Portal using the following filters: query: "desinformação", species: "notícias"
 class NewsUrlsCollector:
     def collect(self, max_page):
         news_urls = []
@@ -27,15 +27,15 @@ class NewsUrlsCollector:
         return parse_qs(parsed_url.query)["u"]
 
 
+# this class extracts title, date and content information from the previously collected articles
 class NewsContentExtractor:
     def extract(self, url):
         article_dict = {}
         response = requests.get(url).content
         soup = BeautifulSoup(response, "html.parser")
-        article_dict["title"] = self.__get_title(soup)
-        article_dict["date"] = soup.find("time")["datetime"]
-        article_dict["body"] = self.__get_body(soup)
-        article_dict["url"] = url
+        article_dict["titulo"] = self.__get_title(soup)
+        article_dict["data"] = self.__get_date(soup)
+        article_dict["corpo"] = self.__get_body(soup)
         return article_dict
 
     def __get_title(self, soup):
@@ -59,6 +59,7 @@ class NewsContentExtractor:
         return " ".join(body_list)
 
 
+# this class uses NewsUrlsCollector and NewsContentExtractor to fetch and parse news information
 class DisinformationNewsCollector:
     def __init__(self):
         self.news_urls_collector = NewsUrlsCollector()
@@ -75,30 +76,32 @@ class DisinformationNewsCollector:
         return news_list
 
 
+# this class is an abstration layer to interface with ElasticSearch
 class ElasticsearchClient:
     def __init__(self):
         self.es = Elasticsearch(["http://elasticsearch:9200"])
         print("Connected to Elasticsearch")
 
-    def create_index(self):
-        mapping_dict = {
-            "properties": {
-                "title": {"type": "text"},
-                "date": {"type": "date"},
-                "body": {"type": "text"},
-                "url": {"type": "text"},
-            }
-        }
-        if not self.es.indices.exists(index="news"):
-            self.es.indices.create(index="news", mappings=mapping_dict)
+    def create_index(self, index, mapping):
+        if not self.es.indices.exists(index=index):
+            self.es.indices.create(index=index, mappings=mapping)
 
-    def add_news(self, documents, index):
+    def add_documents(self, documents, index):
         for document in documents:
             self.es.create(index=index, document=document)
 
 
-collector_news = DisinformationNewsCollector()
-disinformation_news = collector_news.collect()
+news_collector = DisinformationNewsCollector()
+disinformation_news = news_collector.collect()
+
+mapping_dict = {
+    "properties": {
+        "titulo": {"type": "text"},
+        "data": {"type": "date"},
+        "corpo": {"type": "text"},
+    }
+}
+
 news = ElasticsearchClient()
-news.create_index()
-news.add_news(disinformation_news, "news")
+news.create_index("noticia", mapping_dict)
+news.add_documents(disinformation_news, "noticias")
