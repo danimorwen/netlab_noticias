@@ -25,6 +25,11 @@ Para a execução do script em ambiente local de desenvolvimento, é utilizada a
 $ docker-compose up
 ```
 
+Após a execução do script, os dados estarão indexados no Elasticsearch e poderão ser visualizados e manipulados através da UI Kibana. O Kibana pode ser acessado através da url [http://localhost:5601](http://localhost:5601)
+
+<img width="1436" alt="Screenshot 2022-07-12 at 23 38 04" src="https://user-images.githubusercontent.com/95288275/178600805-40526503-bd8b-40c9-a1b8-cc20b9b9a1aa.png">
+
+
 #### Troubleshooting
 Se o container principal da aplicação está retornando erros de timeout, pois a instância Elasticsearch está demorando mais do que o tempo que o container espera, recomenda-se executar os containers separadamente, como no exemplo abaixo:
 ```bash
