@@ -30,6 +30,7 @@ class NewsUrlsCollector:
 # this class extracts title, date and content information from the previously collected articles
 class NewsContentExtractor:
     def extract(self, url):
+        print(f"Extracting news information from {url}")
         article_dict = {}
         response = requests.get(url).content
         soup = BeautifulSoup(response, "html.parser")
@@ -88,11 +89,13 @@ class ElasticsearchClient:
 
     def add_documents(self, documents, index):
         for document in documents:
-            self.es.create(index=index, document=document)
+            self.es.index(index=index, document=document)
 
 
 news_collector = DisinformationNewsCollector()
+print("Collecting disinformation news from G1...")
 disinformation_news = news_collector.collect()
+print("Done!")
 
 mapping_dict = {
     "properties": {
@@ -101,7 +104,8 @@ mapping_dict = {
         "corpo": {"type": "text"},
     }
 }
-
+print("Adding collected data to Elasticsearch datastore...")
 news = ElasticsearchClient()
-news.create_index("noticia", mapping_dict)
+news.create_index("noticias", mapping_dict)
 news.add_documents(disinformation_news, "noticias")
+print("Done!")
