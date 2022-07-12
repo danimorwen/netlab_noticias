@@ -1,8 +1,10 @@
 # Notícias sobre desinformação - NetLab
+#### Autora: [Danielle de Pinho Mello](https://www.linkedin.com/in/danielledepinho/)
+<br/>
 
 A proposta deste projeto é coletar pelo menos 50 notícias sobre desinformação no Portal G1 e indexá-las na base Elasticsearch.
 
-## Table of Contents
+## Sumário
 
 - [Sobre](#sobre)
 - [Desenvolvimento](#desenvolvimento)
@@ -22,9 +24,8 @@ Para a execução do script em ambiente local de desenvolvimento, é utilizada a
 ```bash
 $ docker-compose up
 ```
-<br/>
 
-Troubleshooting:
+#### Troubleshooting
 Se o container principal da aplicação está retornando erros de timeout, pois a instância Elasticsearch está demorando mais do que o tempo que o container espera, recomenda-se executar os containers separadamente, como no exemplo abaixo:
 ```bash
 $ docker-compose up elasticsearch kibana
@@ -39,4 +40,3 @@ $ docker-compose run app
 Neste momento, este projeto não contempla a implementação de um processo automatizado de implantação. No entanto, a arquitetura e os procedimentos necessários para implantação do projeto na plataforma GCP estão descritos em um [documento markdown em separado.](./docs/deployment.md)
 <br/>
 
-#### Autora: [Danielle de Pinho Mello](https://www.linkedin.com/in/danielledepinho/)
