@@ -1,19 +1,22 @@
-## Cloud Deployment através do GCP
+# Cloud Deployment através do GCP
 
-### Arquitetura
-
-O script python irá ser executado usando um container docker pelo serviço Cloud Run do GCP.
+## Arquitetura
+<br/>
+O script python irá ser executado usando um container docker pelo serviço Compute Engine do GCP.
 O script é responsável pela coleta dos dados e pela sua inserção na base Elasticsearch.
+Para habilitar o processo de implantação contínua do projeto, será utilizada o serviço Cloud Build do GCP para criação da imagem do container do app na nuvem e assim, possibilitar sua execução por uma VM criada pelo serviço Compute Engine.
 
 A base Elasticsearch, assim como a UI Kibana, são disponibilizadas pelo serviço Elastic Cloud, do GCP.
+<br/>
 
-### Implantação
-
+## Implantação
+<br/>
 O primeiro passo é criar um novo projeto dentro da plataforma do Google Cloud, de modo a isolar os serviços utilizados por esta solução.
 Para criar é necessário definir um nome, qual conta de cobrança e a organização, quando aplicável.
 Dentro do projeto, os serviços Elastic Cloud e Cloud Run devem ser habilitados.
 
-#### Elastic Cloud
+### Elastic Cloud
+
 O Elastic Cloud pode ser encontrado dentro do Marketplace do GCP. Para utilizá-lo, primeiramente, deve ser assinado, onde é necessário definir o período de assinatura e a taxa de uso.
 
 Ao ser habilitado, o serviço deve ser gerenciado através da plataforma da Elastic Cloud que pode ser acessada pela área API & Services no GCP.
@@ -45,16 +48,13 @@ client = Elasticsearch(
 )
 
 ```
+<br/>
 
-#### Google Cloud Build
+### Google Compute Engine
 
+Para realizar a implantação do script python, primeiramente, é preciso habitar os serviços Cloud Build e Compute Engine através do Console do GCP.
 
-
-#### Google Cloud Run
-
-
-
-O Dockerfile será atualizado, como mostrado abaixo, para ser executável no ambiente Cloud Run.
+O Dockerfile deverá ser atualizado, como mostrado abaixo, para ser executável no ambiente Cloud Run.
 
 ```docker
 FROM python:3.10-bullseye
@@ -70,3 +70,33 @@ RUN rm -f /temp/requirements.txt
 COPY . .
 CMD ["python3", "code/news_collector.py"]
 ```
+
+Para criar a estrutura de integração contínua, deve-se criar um novo Build Trigger através do serviço Cloud Build. A imagem do container é criada no Container Registry quando é realizado um push na branch principal do repositório do projeto no Github. Isto permite que qualquer alteração de código realizada no Github ative o processo de criação de uma nova versão da imagem do container do projeto no Container Registry.
+
+Passo a passo para criar o Build Trigger:
+* Acessar a página de Triggers no Console do GCP
+* Clicar no botão para criar um novo Trigger
+* Nomear o Trigger e selecionar a região como global
+* Definir o evento que invocará o Trigger como "push to a branch"
+* Selecionar o Github como provedor de repositórios e autenticá-lo
+* Instalar a integração do Google Cloud Build no Github
+* Selecionar o repositório do projeto
+* Definir a expressão do branch principal como "main"
+* Definir o tipo de configuração como Dockerfile e indicar sua localização (o default já irá procurar por um arquivo chamado Dockerfile na raiz do projeto)
+* Concluir o processo
+
+Após a execução com sucesso do Build e criação da imagem no Container Registry, é necessário criar uma VM no Compute Engine que irá executar o script python através do container.
+
+Passo a passo para executar o script pelo Compute Engine:
+* Acessar o Container Registry para obter a id completa da imagem criada
+* Acessar o Compute Engine e iniciar o processo para criar uma nova instância de máquina virtual (VM)
+* Nomear a máquina e definir a região e zona
+* Definir a configuração da máquina (para este projeto o tipo e2-micro pode ser suficiente)
+* Definir o container através do botão "Deploy Container"
+* Indicar a id completa da imagem do container (previamente coletada no Container Registry) e mantenha os valores default
+* Manter os valores default para as demais configurações
+* Concluir o processo 
+
+Após o boot da VM, o container irá executar o processo de coleta de dados automaticamente.
+
+É possível acessar a VM através de conexão SSH para verificar o status de execução do container.
