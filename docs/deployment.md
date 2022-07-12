@@ -1,7 +1,7 @@
 # Cloud Deployment através do GCP
 
 ## Arquitetura
-<br/>
+
 O script python irá ser executado usando um container docker pelo serviço Compute Engine do GCP.
 O script é responsável pela coleta dos dados e pela sua inserção na base Elasticsearch.
 Para habilitar o processo de implantação contínua do projeto, será utilizada o serviço Cloud Build do GCP para criação da imagem do container do app na nuvem e assim, possibilitar sua execução por uma VM criada pelo serviço Compute Engine.
@@ -10,7 +10,7 @@ A base Elasticsearch, assim como a UI Kibana, são disponibilizadas pelo serviç
 <br/>
 
 ## Implantação
-<br/>
+
 O primeiro passo é criar um novo projeto dentro da plataforma do Google Cloud, de modo a isolar os serviços utilizados por esta solução.
 Para criar é necessário definir um nome, qual conta de cobrança e a organização, quando aplicável.
 Dentro do projeto, os serviços Elastic Cloud e Cloud Run devem ser habilitados.
@@ -48,7 +48,7 @@ client = Elasticsearch(
 )
 
 ```
-<br/>
+
 
 ### Google Compute Engine
 
@@ -56,7 +56,7 @@ Para realizar a implantação do script python, primeiramente, é preciso habita
 
 O Dockerfile deverá ser atualizado, como mostrado abaixo, para ser executável no ambiente Cloud Run.
 
-```docker
+```Dockerfile
 FROM python:3.10-bullseye
 
 WORKDIR /app
